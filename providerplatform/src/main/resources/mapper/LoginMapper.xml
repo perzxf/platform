@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jb.mapper.login.LoginMapper">
+    <select id="queryUserLogin" parameterType="com.jb.model.AllUser" resultType="com.jb.model.AllUser">
+        select  * from all_user where userName=#{userName}
+    </select>
+    <select id="queryMyTree" parameterType="com.jb.model.AllTree" resultType="com.jb.model.AllTree">
+        SELECT * FROM all_tree where status=#{status} and pid=#{pid}
+    </select>
+</mapper>

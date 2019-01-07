@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jb.mapper.seller.SellMapper">
+
+    <select id="queryChannel" resultType="com.jb.model.TChannel">
+        select * from t_channel
+    </select>
+
+    <select id="queryType" resultType="com.jb.model.TType">
+        select * from t_type
+    </select>
+
+    <select id="queryCustomMadePrPageCount" parameterType="map" resultType="int">
+        select count(*)
+        from custom_made_pr cmp
+        LEFT JOIN t_type tt on cmp.type_id=tt.id
+        LEFT JOIN bill_of_materials bom on cmp.bill_of_materials_id=bom.id
+        LEFT JOIN t_channel tc on bom.channel_id=tc.id where 1 = 1
+        <include refid="CustomMadePrWhere"></include>
+    </select>
+
+    <select id="queryCustomMadePrPageList" parameterType="map" resultType="com.jb.model.CustomMadePr">
+        select cmp.id,
+        bom.`name` as bomName,
+        cmp.type_id as typeId,
+        tt.`name` as ttName,
+        cmp.time,tc.`name` as tcName,
+        cmp.order_size as orderSize,
+        material_id as materialId,
+        service_id as serviceId,
+        annex_id as annexId
+        from custom_made_pr cmp
+        LEFT JOIN t_type tt on cmp.type_id=tt.id
+        LEFT JOIN bill_of_materials bom on cmp.bill_of_materials_id=bom.id
+        LEFT JOIN t_channel tc on bom.channel_id=tc.id where 1 = 1
+        <include refid="CustomMadePrWhere"></include> order by cmp.type_id
+        LIMIT #{startIndex,jdbcType=NUMERIC},#{rows,jdbcType=NUMERIC}
+    </select>
+
+    <select id="queryCustomMadePrList" resultType="com.jb.model.CustomMadePr">
+        select cmp.id,bom.`name` as bomName,cmp.type_id as typeId,tt.`name` as ttName,cmp.time,tc.`name` as tcName,cmp.order_size as orderSize,
+        material_id as materialId,service_id as serviceId,annex_id as annexId
+        from custom_made_pr cmp
+        LEFT JOIN t_type tt on cmp.type_id=tt.id
+        LEFT JOIN bill_of_materials bom on cmp.bill_of_materials_id=bom.id
+        LEFT JOIN t_channel tc on bom.channel_id=tc.id where 1 = 1
+    </select>
+
+    <sql id="CustomMadePrWhere">
+        <if test="customMadePr.bomName != null and customMadePr.bomName != ''">
+            and bom.name like '%${customMadePr.bomName}%'
+        </if>
+        <if test="customMadePr.tcId != null and customMadePr.tcId != ''">
+            and tc.id = #{customMadePr.tcId}
+        </if>
+        <if test="customMadePr.status != null and customMadePr.status != ''">
+            and cmp.status = #{customMadePr.status}
+        </if>
+        <if test="customMadePr.typeId != null and customMadePr.typeId != ''">
+            and tt.id = #{customMadePr.typeId}
+        </if>
+        <if test="customMadePr.beginTime != null and customMadePr.beginTime != ''">
+            and cmp.time >= DATE_FORMAT(#{customMadePr.beginTime},'%Y-%m-%d')
+        </if>
+        <if test="customMadePr.endTime != null and customMadePr.endTime != ''">
+            and cmp.time &lt;= DATE_FORMAT(#{customMadePr.endTime},'%Y-%m-%d')
+        </if>
+    </sql>
+
+    <select id="queryInquiryListt" resultType="com.jb.model.InquiryList" parameterType="com.jb.model.InquiryList">
+        select il.id,il.expected_total_priceint as expectedTotalPriceint,il.payment_node as paymentNode,
+            il.payment_ratio as paymentRatio,il.payment_days as paymentDays,il.invoice_type as invoiceType,
+            il.tax_rate as taxRate,il.billing_type as billingType,il.settlement,il.mode_of_distribution as modeOfDistribution,
+            il.shipping_address as shippingAddress,il.purchasing_department as purchasingDepartment,il.default_factory as defaultFactory,
+            il.default_warehouse as defaultWarehouse,il.remark_section as remarkSection,il.pr_id as prId
+             from inquiry_list il where il.pr_id = #{prId}
+    </select>
+
+    <select id="queryCustomizedProductInformation" resultType="com.jb.model.CustomizedProductInformation" parameterType="com.jb.model.CustomizedProductInformation">
+        SELECT cpi.id,cpi.name,cpi.import_min as importMin,cpi.import_max as importMax,cpi.exit_min as exitMin,
+        cpi.exit_max as exitMax,cpi.rated_flow as ratedFlow,cpi.regulator_kit as regulatorKit,cpi.outer_box as outerBox,
+        cpi.box_materials as boxMaterials,cpi.remark_section as remarkSection
+         FROM customized_product_information cpi where cpi.pr_id= #{prId}
+    </select>
+
+    <update id="updateWaiveOfferById" parameterType="string">
+        update custom_made_pr  set type_id=6 where id=#{value}
+    </update>
+
+    <!--查询 文件上传总条数-->
+    <select id="queryListTAnnexCount" parameterType="map" resultType="int">
+        select count(*) from t_annex t where t.pid = #{tAnnex.pid}
+    </select>
+
+
+    <!--查询 文件上传-->
+    <select id="queryListTAnnex" parameterType="map" resultType="com.jb.model.TAnnex">
+        select t.id as id,t.name as name from t_annex t where t.pid = #{tAnnex.pid}
+        LIMIT #{startIndex,jdbcType=NUMERIC},#{rows,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 查看材料单  总数-->
+    <select id="queryListTMaterialCount" parameterType="map" resultType="int">
+        select count(*) from t_material t
+    </select>
+
+    <!--查询 材料单 -->
+    <select id="queryListTMaterial" parameterType="map" resultType="com.jb.model.TMaterial">
+        select * from t_material t
+        LIMIT #{startIndex,jdbcType=NUMERIC},#{rows,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 定制比价管理（服务商)   上传 -->
+    <insert id="addFolder" parameterType="com.jb.model.TAnnex">
+        insert into t_annex(id,name,pid,url) values
+        (#{id},#{name},#{pid},#{url})
+    </insert>
+
+    <!-- 定制比价管理（服务商)   删除 -->
+    <delete id="deleteSuppiy" parameterType="com.jb.model.TAnnex">
+        delete from t_annex where id = #{id}
+    </delete>
+
+    <!--查询 方案详情总条数-->
+    <select id="queryListschemeCount" parameterType="map" resultType="int">
+        select count(*) from t_annex t
+    </select>
+
+
+    <!--查询 方案详情-->
+    <select id="queryListscheme" parameterType="map" resultType="com.jb.model.TAnnex">
+        select t.id as id,t.name as name from t_annex t
+        LIMIT #{startIndex,jdbcType=NUMERIC},#{rows,jdbcType=NUMERIC}
+    </select>
+
+</mapper>

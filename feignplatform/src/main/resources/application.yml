@@ -1,0 +1,27 @@
+server:
+  port: 8091
+spring:
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true
+      cluster-name: elasticsearch
+      cluster-nodes: localhost:9300
+  application:
+    name: cloudfeign
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password:
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+    timeout: 10000
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8088/eureka

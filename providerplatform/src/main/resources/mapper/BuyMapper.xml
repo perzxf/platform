@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jb.mapper.buyer.BuyMapper">
+    <select id="queryItemCount" parameterType="map" resultType="int">
+        select count(*) from custom_made_pr c
+        left join bill_of_materials b on c.bill_of_materials_id = b.id
+        left join t_channel n on b.channel_id = n.id
+        where 1 = 1
+    </select>
+
+    <select id="queryItem" parameterType="map" resultType="com.jb.model.CustomMadePr">
+        select
+        c.annex_id as annexId,
+        c.bill_of_materials_id as billOfMaterialsId,
+        c.id as id,
+        c.material_id as materialId,
+        c.order_size as orderSize,
+        c.service_id as serviceId,
+        c.`status` as status,
+        c.time as time,
+        c.item_star_status as itemstarstatus,
+        c.startime as startime,
+        c.type_id as typeId,
+        b.`name`as bomName,
+        b.time as billTime,
+        b.channel_id as tcId,
+        n.`name` as tcName
+        from
+        custom_made_pr c
+        left join bill_of_materials b on c.bill_of_materials_id = b.id
+        left join t_channel n on b.channel_id = n.id
+        where 1 = 1
+            LIMIT #{startIndex},#{endIndex}
+    </select>
+
+    <update id="updatestarStatusById" parameterType="com.jb.model.CustomMadePr">
+        update custom_made_pr set item_star_status = 3 where id =  #{id}
+    </update>
+
+    <select id="queryCategories" parameterType="String" resultType="com.jb.model.CustomizedProductCategories">
+      select cpc.id as id ,cpc.pid as pid,cpc.type_name as typeName from customized_product_categories cpc  where pid = #{value}
+    </select>
+
+    <select id="queryTChannelEg" resultType="com.jb.model.TChannel">
+            select t.id ,t.name from t_channel t
+    </select>
+
+    <insert id="saveBillOfMaterials" parameterType="com.jb.model.BillOfMaterials">
+        insert into bill_of_materials (id, name,time, channel_id) values (#{id},#{name},#{time},#{channelId})
+    </insert>
+
+    <insert id="saveCustomMadePr" parameterType="com.jb.model.CustomMadePr">
+        insert into custom_made_pr (id, bill_of_materials_id, type_id, startime,time, order_size,
+         material_id, service_id, annex_id, remarks, supplyperiod, effectivetime, status, item_star_status) values (
+        #{id},#{billOfMaterialsId},#{typeId},#{startime},#{time},#{orderSize},
+        #{materialId},#{serviceId},#{annexId},#{remarks},#{supplyperiod},#{effectivetime},
+        #{status},#{itemstarstatus})
+    </insert>
+
+    <insert id="insertinquiry" parameterType="com.jb.model.InquiryList">
+        insert into inquiry_list (id, expected_total_priceint, payment_node,
+         payment_ratio, payment_days, invoice_type, tax_rate, billing_type,
+          settlement, mode_of_distribution, shipping_address, purchasing_department,
+           default_factory, default_warehouse, remark_section, pr_id) values
+           (#{id},#{expectedTotalPriceint},#{paymentNode},#{paymentRatio},#{paymentDays},
+           #{invoiceType},#{taxRate}, #{billingType},#{settlement},#{modeOfDistribution},
+           #{shippingAddress},#{purchasingDepartment},#{defaultFactory},#{defaultWarehouse},
+           #{remarkSection},#{prId})
+    </insert>
+
+    <insert id="saveCustomizedProductInformation" parameterType="com.jb.model.CustomizedProductInformation">
+        insert into customized_product_information (id, name, import_min, import_max,
+        exit_min, exit_max, rated_flow, regulator_kit, outer_box, box_materials, remark_section, pr_id) values (
+        #{id},#{name},#{importMin},#{importMax},#{exitMin},#{exitMax},#{ratedFlow},#{regulatorKit},
+        #{outerBox},#{boxMaterials},#{remarkSection},#{prId}
+        )
+    </insert>
+
+
+    <update id="updatepostpone" parameterType="com.jb.model.Postpone">
+       update custom_made_pr c set c.time = date_add(time ,interval #{time} DAY) where c.id = #{id}
+    </update>
+
+    <select id="queryCustomBean" resultType="com.jb.model.CustomMadePr">
+        select
+        c.annex_id as annexId,
+        c.bill_of_materials_id as billOfMaterialsId,
+        c.id as id,
+        c.material_id as materialId,
+        c.order_size as orderSize,
+        c.service_id as serviceId,
+        c.`status` as status,
+        c.time as time,
+        c.item_star_status as itemstarstatus,
+        c.startime as startime,
+        c.type_id as typeId,
+        b.`name`as bomName,
+        b.time as billTime,
+        b.channel_id as tcId,
+        n.`name` as tcName
+        from
+        custom_made_pr c
+        left join bill_of_materials b on c.bill_of_materials_id = b.id
+        left join t_channel n on b.channel_id = n.id
+    </select>
+
+    <delete id="deleteorder" parameterType="com.jb.model.Postpone" >
+        delete  from custom_made_pr where id = #{id}
+    </delete>
+
+    <update id="updatestarStatuss" parameterType="com.jb.model.Postpone">
+        update custom_made_pr set item_star_status = 1 where id = #{id}
+    </update>
+</mapper>

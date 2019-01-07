@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jb.mapper.seller.MyMaterialsMapper">
+    <!-- 不分页查询 -->
+    <select id="queryMyMaterials" resultType="com.jb.model.TMymaterials">
+        select t1.id,t1.materialsname,t2.name as channe,t1.amount,t1.savetime
+        from t_mymaterials t1
+        left join t_channel t2 on t1.channels=t2.id
+    </select>
+
+    <!-- 查询总条数 -->
+    <select id="queryMyMaterialsCount" parameterType="map" resultType="int">
+        select count(*)
+        from custom_made_pr c
+        left join bill_of_materials b on c.bill_of_materials_id = b.id
+        left join t_channel n on b.channel_id = n.id
+        where c.`status` = 3
+        <include refid="MyMaterialsWhere"></include>
+    </select>
+    <!-- 分页查询 -->
+    <select id="queryMyMaterialsPage" parameterType="map" resultType="com.jb.model.CustomMadePr">
+        select
+        c.annex_id as annexId,
+        c.bill_of_materials_id as billOfMaterialsId,
+        c.id as id,
+        c.material_id as materialId,
+        c.order_size as orderSize,
+        c.service_id as serviceId,
+        c.`status` as status,
+        c.time as time,
+        c.type_id as typeId,
+        b.`name`as bomName,
+        b.time as billTime,
+        b.channel_id as tcId,
+        n.`name` as tcName
+        from
+        custom_made_pr c
+        left join bill_of_materials b on c.bill_of_materials_id = b.id
+        left join t_channel n on b.channel_id = n.id
+        where c.`status` = 3
+        <include refid="MyMaterialsWhere"></include>
+         LIMIT #{startIndex,jdbcType=NUMERIC},#{rows,jdbcType=NUMERIC}
+    </select>
+    <!-- 条件查询 -->
+    <sql id="MyMaterialsWhere">
+        <if test="customMadePr.bomName != null and customMadePr.bomName != ''">
+            and b.name like '%${customMadePr.bomName}%'
+        </if>
+        <if test="customMadePr.tcId != null and customMadePr.tcId != ''">
+            and b.channel_id = #{customMadePr.tcId}
+        </if>
+    </sql>
+    <!-- 根据ID回显 -->
+    <select id="queryTMymaterialsById" parameterType="string" resultType="com.jb.model.CustomMadePr">
+        select c.id,t.category,t.materialname,t.id,t.count,b.`name`
+        from
+        custom_made_pr c
+        left join bill_of_materials b on c.bill_of_materials_id = b.id
+        left join t_material t on c.material_id = t.custom_made_pr_id
+        where c.id = #{id}
+    </select>
+    <!-- 新增 -->
+    <insert id="saveTMymaterials" parameterType="com.jb.model.CustomMadePr">
+        insert into t_mymaterials (id,materialsname,channels,amount,savetime)
+        values(#{id},#{materialsname},#{channels},#{amount},#{savetime})
+    </insert>
+    <!-- 修改 -->
+    <update id="updateTMymaterialsById" parameterType="com.jb.model.CustomMadePr">
+        update t_material set count=#{count} where id=#{id}
+    </update>
+    <!-- 删除 -->
+    <delete id="deleteTMymaterialsById" parameterType="string">
+        delete from t_material where id = #{value}
+    </delete>
+    <select id="queryTChannel" resultType="com.jb.model.TChannel">
+       select * from t_channel
+    </select>
+
+    <select id="queryTMaterial" resultType="com.jb.model.CustomMadePr">
+        select
+		c.annex_id as annexId,
+		c.bill_of_materials_id as billOfMaterialsId,
+		c.id as id,
+		c.material_id as materialId,
+		c.order_size as orderSize,
+		c.service_id as serviceId,
+		c.`status` as status,
+		c.time as time,
+		c.type_id as typeId,
+		b.`name`as bomName,
+		b.time as billTime,
+		b.channel_id as tcId,
+		n.`name` as tcName,
+		m.brand as brand,
+		m.category as category,
+		m.count as count,
+		m.materialname as materialname,
+		m.materialnumber as materialnumber,
+		m.unitprice as unitprice,
+		m.id as mId,
+		s.`name` as name,
+		s.price as price
+		from
+		custom_made_pr c
+		left join bill_of_materials b on c.bill_of_materials_id = b.id
+		left join t_channel n on b.channel_id = n.id
+        left join t_material m on c.material_id = m.custom_made_pr_id
+		left join t_service_quotation s on c.service_id = s.custom_made_pr_id
+		where c.`status`=3 and  c.id = #{value}
+		group by c.id
+    </select>
+</mapper>

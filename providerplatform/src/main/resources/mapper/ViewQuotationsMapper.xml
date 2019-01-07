@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jb.mapper.seller.ViewQuotationsMapper">
+
+    <select id="queryMaterialCount" parameterType="map" resultType="int">
+        select count(*) from t_material m where m.custom_made_pr_id=#{material.custommadeprid}
+        <include refid="queryList"></include>
+    </select>
+    <select id="queryMaterial" parameterType="map" resultType="com.jb.model.TMaterial">
+        SELECT
+            m.id as id,m.materialname as materialname,
+            m.materialnumber as materialnumber,
+            m.category as category,m.count as count,m.brand as brand,
+            m.unitprice as unitprice,
+            cmp.id as custommadeprid,
+            cmp.annex_id as annexid,
+            cmp.remarks as remarks,
+            cmp.effectivetime as effectivetime,
+            cmp.supplyperiod as supplyperiod
+        FROM t_material m LEFT JOIN custom_made_pr cmp on m.custom_made_pr_id=cmp.material_id
+        where m.custom_made_pr_id=#{material.custommadeprid}
+        <include refid="queryList"></include>
+        GROUP BY m.id
+        limit #{break},#{rows};
+    </select>
+    <sql id="queryList">
+        <if test="material.status!=null and material.status!=''">
+            and m.status=#{material.status}
+        </if>
+    </sql>
+
+    <select id="queryTServiceQuotation" parameterType="com.jb.model.TServiceQuotation" resultType="com.jb.model.TServiceQuotation">
+        select q.id as id,
+			 q.name as name,
+			 q.price as price,
+			 q.custom_made_pr_id as customMadePrId
+        from t_service_quotation q
+        where q.custom_made_pr_id=#{customMadePrId} and q.status=#{status};
+    </select>
+
+    <update id="updateMaterial" parameterType="com.jb.model.TMaterial">
+        update t_material set brand=#{brand},unitprice=#{unitprice} where id=#{id}
+    </update>
+    <update id="updateMaterialPrice" parameterType="com.jb.model.TMaterial">
+        update t_material set unitprice=#{unitprice} where id=#{id}
+    </update>
+    <update id="updateMaterialBrand" parameterType="com.jb.model.TMaterial">
+        update t_material set brand=#{brand} where id=#{id}
+    </update>
+    <delete id="deleteService" parameterType="com.jb.model.TServiceQuotation">
+        delete from t_service_quotation  where custom_made_pr_id =#{customMadePrId} and status=#{status}
+    </delete>
+
+    <insert id="saveService" parameterType="com.jb.model.TServiceQuotation">
+        insert into t_service_quotation(id,name,custom_made_pr_id,price,status) values(#{id},#{name},#{customMadePrId},#{price},#{status})
+    </insert>
+
+    <update id="updateCustommadepr" parameterType="com.jb.model.TMaterial">
+        update custom_made_pr set remarks=#{remarks},supplyperiod=#{supplyperiod},effectivetime=#{effectivetime} where id=#{custommadeprid}
+    </update>
+
+    <update id="updateServicePrice" parameterType="com.jb.model.TServiceQuotation">
+        update t_service_quotation set price=#{price} where id=#{id}
+    </update>
+</mapper>

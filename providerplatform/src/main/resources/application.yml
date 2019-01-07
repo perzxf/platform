@@ -1,0 +1,43 @@
+server:
+  port: 8090
+spring:
+  rabbitmq:
+    host: 192.168.118.130
+    port: 5672
+    username: admin
+    password: admin
+  application:
+    name: cloudprovider
+  datasource:
+    url: jdbc:mysql://localhost:3306/jingbei?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      max-active: 20
+      initial-size: 1
+      max-wait: 60000
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password:
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+    timeout: 10000
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/test
+mybatis:
+  mapper-locations: classpath*:/mapper/*.xml
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8088/eureka
+

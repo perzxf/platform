@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jb.mapper.seller.MaterialMapper">
+
+    <!-- 查询总条数 -->
+    <select id="queryCustomMadePrCount" parameterType="map" resultType="int">
+        select count(*) from custom_made_pr c
+        left join bill_of_materials b on c.bill_of_materials_id = b.id
+        left join t_channel n on b.channel_id = n.id
+        where c.`status` = 2
+        <include refid="CustomMadePrWhere"></include>
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="queryCustomMadePrPageList" parameterType="map" resultType="com.jb.model.CustomMadePr">
+        select
+        c.annex_id as annexId,
+        c.bill_of_materials_id as billOfMaterialsId,
+        c.id as id,
+        c.material_id as materialId,
+        c.order_size as orderSize,
+        c.service_id as serviceId,
+        c.`status` as status,
+        c.time as time,
+        c.type_id as typeId,
+        b.`name`as bomName,
+        b.time as billTime,
+        b.channel_id as tcId,
+        n.`name` as tcName
+        from
+        custom_made_pr c
+        left join bill_of_materials b on c.bill_of_materials_id = b.id
+        left join t_channel n on b.channel_id = n.id
+        where c.`status` = 2
+        <include refid="CustomMadePrWhere"></include>
+        LIMIT #{startIndex,jdbcType=NUMERIC},#{rows,jdbcType=NUMERIC}
+    </select>
+
+
+
+
+    <sql id="CustomMadePrWhere">
+        <if test="customMadePr.bomName != null and customMadePr.bomName != ''">
+            and b.`name` like '%${customMadePr.bomName}%'
+        </if>
+        <if test="customMadePr.tcId != null and customMadePr.tcId != ''">
+            and b.channel_id = #{customMadePr.tcId}
+        </if>
+    </sql>
+
+    <!-- 查看材料单 -->
+    <select id="queryCxyCustomMadePr" parameterType="String" resultType="com.jb.model.CustomMadePr">
+         select
+            c.annex_id as annexId,
+            c.bill_of_materials_id as billOfMaterialsId,
+            c.id as id,
+            c.material_id as materialId,
+            c.order_size as orderSize,
+            c.service_id as serviceId,
+            c.`status` as status,
+            c.time as time,
+            c.type_id as typeId,
+            b.`name`as bomName,
+            b.time as billTime,
+            b.channel_id as tcId,
+            n.`name` as tcName,
+            m.brand as brand,
+            m.category as category,
+            m.count as count,
+            m.materialname as materialname,
+            m.materialnumber as materialnumber,
+            m.unitprice as unitprice,
+            m.id as mId,
+            s.id as sId,
+            s.`name` as name,
+            s.price as price
+          from
+        custom_made_pr c
+        left join bill_of_materials b on c.bill_of_materials_id = b.id
+        left join t_channel n on b.channel_id = n.id
+		left join t_material m on c.material_id = m.custom_made_pr_id
+        left join t_service_quotation s on c.service_id = s.custom_made_pr_id
+        where c.material_id = ${value}
+        group by m.id
+    </select>
+
+
+
+    <!-- 删除菜单表 -->
+    <delete id="deleteCxyCustomMadePr" parameterType="String">
+        delete from t_material  where id = #{id}
+    </delete>
+
+
+    <!-- 删除服务项表 -->
+    <delete id="delServiceQuotation" parameterType="String">
+        delete from t_service_quotation  where id = #{id}
+    </delete>
+
+    <!-- 修改 -->
+   <update id="updateCxyCustomMadePr" parameterType="com.jb.model.CustomMadePr">
+		update t_material m set
+        m.count = #{count},
+        m.brand = #{brand},
+        m.unitprice = #{unitprice}
+        where m.id = #{id}
+	</update>
+
+    <!-- 修改(材料单名称) -->
+    <update id="updateBillOfMaterials" parameterType="com.jb.model.BillOfMaterials">
+		update bill_of_materials b set
+        b.`name` = #{name}
+        where b.id = #{id}
+	</update>
+
+
+    <!-- 渠道下拉 -->
+    <select id="queryTChannelList" resultType="com.jb.model.TChannel">
+	select * from t_channel
+	</select>
+
+
+
+
+    <!-- 修改数量 -->
+    <update id="updateCount" parameterType="com.jb.model.TMaterial">
+		update t_material m set
+        m.count = #{count}
+        where m.id = #{id}
+	</update>
+
+    <!-- 修改品牌 -->
+    <update id="updateBrand" parameterType="com.jb.model.TMaterial">
+		update t_material m set
+        m.brand = #{brand}
+        where m.id = #{id}
+	</update>
+
+
+    <!-- 修改品牌 -->
+    <update id="updateUnitprice" parameterType="com.jb.model.TMaterial">
+		update t_material m set
+        m.unitprice = #{unitprice}
+        where m.id = #{id}
+	</update>
+
+</mapper>
